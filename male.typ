@@ -38,7 +38,7 @@ This was all covered in Stocha. It will not be repeated here.
 
 / Entropy of target feature t: $ H(t) = - sum_(k=1)^K (P(t=k) dot log_2 P(t=k)) $
 - measure of impurity or uncertainty in a dataset
-- minimal entropy is 0 (when all instances belong to the same class), maximal entropy is log_2(K) (when instances are evenly distributed across K classes).
+- minimal entropy is 0 (when all instances belong to the same class), maximal entropy is $log_2(K)$ (when instances are evenly distributed across K classes).
 
 / Overall Entropy: $ H_W^d(t) = sum_("node" in "leaf_nodes"(d)) ((|"node"|)/N dot H^("node")(t)) $
 - weighted average of individual entropies 
@@ -644,8 +644,37 @@ $ y_k (x) = g^((2)) ( sum_(i=0)^M w_(k i)^((2)) g^((1)) ( sum_(j=0)^D w_(i j)^((
   caption: [Simplified Computation Graph],
 )
 
+== Responisble Data Science
+Four key concerns: Fairness, Accuracy, Confidentiality, and Transparency ("FACT"!)
 
 
+This chapter mainly contains metrics to compute confidentiality and fairness of metrics we have already seen before. 
+
+=== Confidentiality
+"How to answer questions without revealing secrets?"
+
+To achieve confidentiality, we anonimize the data table and build equivalence classes ECs (instances in the same value range, like age: 20-25, 30-35, 35+ etc.). We can measure it using 3 metrics:
+
+- / k-Anonymity: each equivalence class contains at least k instances
+- / Entropy l-diversity: a data table is l-diverse if for every EC: $H(E  C) >= log_2(l)$
+- / t-Closeness: EC has t-closeness if the distance between the distribution DE of a sensitive feature in this class and the distribution DT of it in the whole table is no more than a threshold t: $D i s t a n c e("DE", "DT") <= t$
+
+=== Fairness
+"How to avoid unfair conclusions even if they are true?". 
+
+We have 2 metrics: 
+
+- / Discrimiation: $d i s c_cal(D)(cal(B)) = 4 dot |support(cal(B) union cal(D)) - support(cal(D)) dot support(cal(B))|$, where:
+  - $cal(B)$ is the  possible outcome, i.e., the target feature(s) having particular vales (e.g.: $cal(B) = {"outcome" = "expected"}$) 
+  - $cal(D)$ is the potentially discriminating itemset characterizing the properties of instances we do not want to have any effect (e.g.: $cal(D) = {"gender" = "male"}$)
+  - This yields a value between 1 (maximal discrimination) and 0 (no discrimination)
+  - Propertiy: $d i s c_cal(D)(cal(B))  = d i s c_cal(D)(cal(overline(B))) = d i s c_cal(overline(D))(cal(B)) = d i s c_cal(overline(D))(cal(overline(B))) $
+
+- / Information Gain in Sensitivity: Decision tree metric $I G S (d) = H(b) - H^d_W (b)$, where:
+  - d is the split feature, b is the sensitive feature
+  - We want the lowest IGS possible, and the highets IGC (classical IG) possible
+
+  
 = Evaluation and AutoML/DS
 
 #let TP = math.op("TP")
