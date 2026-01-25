@@ -644,9 +644,40 @@ $ y_k (x) = g^((2)) ( sum_(i=0)^M w_(k i)^((2)) g^((1)) ( sum_(j=0)^D w_(i j)^((
   caption: [Simplified Computation Graph],
 )
 
+#pagebreak()
+
+= Empirical Analysis and Performance Optimization
+
+
+== Data Quality and Preprocessing
+- Goal: increase data quality and modify the data to suit the analysis question and applied techniques, "Garbage in, garbage out"
+
+- Quality aspects: accuracy, completeness, consitency, timeliness
+
+=== Missing Values 
+For example, an image missing a few pixel, what do we do?
+- ignore:
+  - discard the whole feature (colomn in the data table)
+  - discard the instance (row in the data table)
+  - ignore the instance only for features where the value is missing
+- create: 
+  - mean/median/mode of the whole feature
+  - mean/median/mode o of all instances belonging to the same class
+  - use a predictor model (decison trees, regression, NNs, SVMs, ...)
+
+=== Outliers 
+For example, a data point far away from it's class' cluster is considered an outlier. We can treat it as a missing value and ignore or replace it (depending on the use case).
+
+=== Preprocessing
+
+- / Transformation: change the data to the right data type
+- / Normalization: adjust the influence of features:
+  - Min-max normalization: TODO
+  - Standard score (Z-score) normalization: TODO
+-/ Reduction: make the data smaller for analysis
+
 == Responisble Data Science
 Four key concerns: Fairness, Accuracy, Confidentiality, and Transparency ("FACT"!)
-
 
 This chapter mainly contains metrics to compute confidentiality and fairness of metrics we have already seen before. 
 
@@ -674,9 +705,7 @@ We have 2 metrics:
   - d is the split feature, b is the sensitive feature
   - We want the lowest IGS possible, and the highets IGC (classical IG) possible
 
-  
-= Evaluation and AutoML/DS
-
+== Evaluation (noch nicht überarbeitet)
 #let TP = math.op("TP")
 #let TN = math.op("TN")
 #let FP = math.op("FP")
