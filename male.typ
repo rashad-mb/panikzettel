@@ -705,55 +705,54 @@ We have 2 metrics:
   - d is the split feature, b is the sensitive feature
   - We want the lowest IGS possible, and the highets IGC (classical IG) possible
 
-== Evaluation (noch nicht überarbeitet)
+== Evaluation 
 #let TP = math.op("TP")
 #let TN = math.op("TN")
 #let FP = math.op("FP")
 #let FN = math.op("FN")
 
-Wir wollen beantworten:
-- Wie gut ist das ML Model?
-- Wie gut könnte es sein?
+Main questions: how good is the ML model, how good can it be?
 
 #figure(
-  image("img/male/eval-matrix.png", height: 8em),
-  caption: [Beispiel Confusion Matrix],
+  image("img/male/eval-matrix.png", height: 12em),
+  caption: [Confusion Matrix],
 ) <confusion-matrix>
 
-Wie bei Statistischen Tests und Studien gibt es hier ein Falsch positives FP, Falsch negatives FN und Wahr positives TP und Wahr negatives TN Ergebnis. Abbildung #ref(<confusion-matrix>) zeigt das im binomial Fall.
+We have 4 cases we can classify our prediction as:
+- True positive $TP$ (correctly labeling a positive label)
+- True negative $TN$ (correctly labeling a negative label)
+- False positive $FP$ (incorrectly labeling a positive label)
+- False negative $FN$ (incorrectly labeling a negative label)
 
-In einem Multinomial Fall, muss man sich ein Feature jeweils raus suchen und sich daraus eine Binomial Matrix bilden. So wie es Sinn ergibt.
+We have multiple measures to evaluate the quality of our prediction model:
+- / Accuracy: $(TP+TN)/#highlight(fill: yellow)[(TP+TN+FP+FN)]$
+- / Misclassification Rate: $(FP + FN)/#highlight(fill: yellow)[(TP+TN+FP+FN)]$
 
-Darauf aufbauend haben wir erneut einige Scores:
-/ Accuracy: $(TP+TN)/(TP+TN+FP+FN)$
-/ Misclassification Rate: $(FP + FN)/(TP+TN+FP+FN)$
-/ True Positiv Rate: $TP/(TP+FN)$
-/ False Negative Rate: $FN/(TP+FN)$
-/ True Negative Rate: $TN/(TN+FP)$
-/ False Positive Rate: $FP/(TN+FP)$
-/ Recall: $= "TPR" = TP/(TP+FN)$
-/ Precision: $TP/(TP+FP)$
-/ $F_1$: $2 dot ("precision" dot "recall")/("precision" + "recal")$
+- / #highlight(fill: blue)[True Positiv] Rate (Recall): $TP/#highlight(fill: blue)[(TP+FN)]$
+- / #highlight(fill: blue)[False Negative] Rate: $FN/#highlight(fill: blue)[(TP+FN)]$
 
-Wie viele Trainingsdaten brauchen wir und wie sind die aufgeteilt?
+- / #highlight(fill: green)[True Negative] Rate: $TN/#highlight(fill: green)[(TN+FP)]$
+- / #highlight(fill: green)[False Positive] Rate: $FP/#highlight(fill: green)[(TN+FP)]$
+- / Precision: $TP/(TP+FP)$ (if we make a positive prediction, how often is it correct?)
+- / $F_1$ Score: $2 dot ("precision" dot "recall")/("precision" + "recal") $ (geometric mean between _recall_ and _precision_)
 
-Wir benötigen ein Trainingsset soweit ist's klar. Aber um overfitting während des Trainings zu reduzieren, benötigen wir ein Validation set. Hiermit können wir abbrechen bei overfitting, oder Hyperparameter Optimierungen ausführen.
+=== Training and Test Data
+- We split our data set into: training and testing. We train the predictivve model with the training set and evaluate it's performance with the testing set.
+- The training set is also split into: training and validation. While training, we need to validate the choice of hyperparameters chosen to finally optimize the performance.
+- Rule of thumb: 50% training set, 20% validation set, 30% testing set (can vary +-10%)
 
-Aber schließlich brauchen wir noch ein Testing set um die Evaluation des Modells auszuführen.
-Das Verhältnis ist variabel, aber (50%, 20%, 30%) oder (40%,20%,40%) wurde in der Vorlesung erwähnt.
-Diese Validierung machen wir meistens mit verschiedenen Modellen gleichzeitig und wählst dann mit den folgenden Methoden die Testdaten aus:
-/ k-Fold Cross Validation: Wähle für $N/k$ große Daten aus. $N$ ist die gesamt Testdaten Größe und wir haben $k$ unterschiedliche Folds.
-/ Jackknifing: Wie k-Fold aber wähle nur eine Testdaten _instance_.
-/ Bootstrapping: Wähle $m in NN$ _instances_ zufällig aus.
+=== How do we deal with small data sets? 
+We train the model k times and evaluate it k times, while varying our choice of training and test sets throughout the iterations:
 
-Hier kann ebenfalls auf Stochastische Tests (t-tests) zurückgegriffen werden, um die Signifikanz von Abweichungen zu überprüfen.
+/ k-Fold Cross Validation: 
+- split data into equally sized chunks ($N/k$)
+- pick one chunk as the test set, the rest is training sets
+- repeat until each partition becomes the test set once (k times)
+- quality score is the average over the k folds
 
-Da FP und FN unterschiedliche Kosten haben können wenden wir eine Profit-Matrix an, die jeweils die unterschiedlichen Kategorien gewichtet.
+/ Jackknifing: k-Fold with $k=N$ (meaning test set is 1 single instance)
+/ Bootstrapping: randomly pick $m in NN$ test instances, repeat k times 
 
-Für die zweite Frage gucken wir uns die ROC-Kurve an.
-
-Hier plotten wir die TPR auf der y und die FPR auf der X Achse.
-Unter der Diagonale ist alles schlechter als random guessing, also kann man hier die Entscheidungen umdrehen und erhält ein gutes Model. Sonst ist ein Kurve die Stark zur 1 auf der X Achse wandert und dann da bleibt besser.
 
 == AutoML
 
