@@ -308,7 +308,7 @@ Partiton of data into N bins of width $Delta$. The height of bin $i$ is then $p_
 - Disadvantages: choosing bin width is non-trivial, not smooth, poor performance in high dimensions.
 
 === Kernel Methods 
-Goal: etermine the number $K$ of data points inside a _fixed_ hypercube (kernel).
+Goal: determine the number $K$ of data points inside a _fixed_ hypercube (kernel).
 
 The kernel function $k(u)$ is 1, whenever the u lies in the hypercube. u is hearby a vector from $x$ to some point $x_n$. If we sum up over all data points, we get the number of data points $K$ in the kernel.
 
@@ -339,19 +339,38 @@ $
 
 == Mixture Models
 
-In einem Mixture Model wird davon ausgegangen, nach mehreren ($M in NN$) probability distributions verteilt zu sein, die sich addieren. Meist wird die Normalverteilung gewählt.
+- Define a flexible enough parametric model to model multimodal data (data sets with 2 clusters, etc.). 
+- We combine multiple densities into a single distrubion
 
-Also $p( x | theta ) = sum_(j=1)^M p(x|theta_j) p(j)$, wobei $theta = (pi_1, theta_1, ..., pi_1, theta_M)$ alle Parameter bündelt und $p(j)=pi_j$ die priors (also die Anfangsvermutungen des _mixtures components_).
+#grid(
+  columns: (1fr, 1fr),
+  [#figure(
+    image("img/male/gauss-mix-2.png", width: 50%),
+  ) <k-nearest>],
+  [#figure(
+    image("img/male/gauss-mix-1.png", width: 50%),
+  ) <k-nearest>],
+)
 
-Um hieraus eine formale Wahrscheinlichkeitsverteilung zu erstellen, muss $sum_(j=1)^M pi_j = 1$ und somit $integral p(x|theta)d x = 1$ sein.
+=== Mixture of Gaussians (MoG)
+- we have M gaussians $p( x | theta ) = sum_(j=1)^M p(x|theta_j) p(j)$
+  - $p(x|theta_j)$ is the likelihood of measurement $x$ given the mixture component $j$
+  - $p(j)=pi_j$ is the prior of component $j$
+  - $integral p(x | theta) d x = 1$
+  - $theta = (pi_1, theta_1, ..., pi_1, theta_M)$ (e.g. $mu, sigma$) 
+  - $sum_(j=1)^M pi_j = 1$
 
-Hierfür gibt es kein analytisches Verfahren, die Maximum Log Likelihoods zu finden. Somit bleiben numerische Verfahren (und) iterative Optimierungsverfahren.
+- Maximum likelihood estimation is difficult (circular definition, hard to find a closed solution)
 
-=== EM Algorithmus
-Der _E-STEP_: $ gamma_j(x_n) <- (pi_j cal(N)(x_n | mu_j, Sigma_j))/(sum_(k=1)^K pi_k cal(N)(x_n | mu_k, Sigma_k)) $
-Hier ist $Sigma$ die Kovarianzmatrix.
+- Advantages: very general, very fast to evaluate (once trained)
+- Disadvantages: numerical instabilities, choosing the number of mixture components, EM algorithm is computationally expensive (run k-means for a couple of iterations)
 
-Der _M-STEP_:
+=== Expectation-Maximization (EM) Algorithm 
+_E-STEP_: softly assign samples to mixture components 
+$ gamma_j(x_n) <- (pi_j cal(N)(x_n | mu_j, Sigma_j))/(sum_(k=1)^K pi_k cal(N)(x_n | mu_k, Sigma_k)) forall j = 1,...,K, n = 1,...,N $
+- $Sigma$ is the covariance matrix
+
+ _M-STEP_: re-estimate parameters of each component based on the soft assignments
 #grid(
   columns: (1fr, 1fr),
   $
@@ -364,7 +383,8 @@ Der _M-STEP_:
   $,
 )
 
-EM Algorithmus muss durch _regularization_ gegen $sigma -> 0$ geschützt werden, weswegen $sigma_min I$ addiert wird #footnote("Der EM Algorithmus wird aus meiner Sicht nicht groß in der Klausur angewandt werden können, Wissensfragen jedoch schon.")
+- Problem: some mixture components focus on singular points, making the estimation collapse
+- Regularize with $ Sigma + sigma_{"min"} II$, in order to enforce minimum width for the gaussians
 
 == Linear Discriminants
 - a _linear discriminant_ $y(x)$ is a linear function that separates two or more classes of data points.
@@ -744,14 +764,14 @@ We have multiple measures to evaluate the quality of our prediction model:
 === How do we deal with small data sets? 
 We train the model k times and evaluate it k times, while varying our choice of training and test sets throughout the iterations:
 
-/ k-Fold Cross Validation: 
-- split data into equally sized chunks ($N/k$)
-- pick one chunk as the test set, the rest is training sets
-- repeat until each partition becomes the test set once (k times)
-- quality score is the average over the k folds
+- / k-Fold Cross Validation: 
+  - split data into equally sized chunks ($N/k$)
+  - pick one chunk as the test set, the rest is training sets
+  - repeat until each partition becomes the test set once (k times)
+  - quality score is the average over the k folds
 
-/ Jackknifing: k-Fold with $k=N$ (meaning test set is 1 single instance)
-/ Bootstrapping: randomly pick $m in NN$ test instances, repeat k times 
+- / Jackknifing: k-Fold with $k=N$ (meaning test set is 1 single instance)
+- / Bootstrapping: randomly pick $m in NN$ test instances, repeat k times 
 
 
 == AutoML
